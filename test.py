@@ -4,9 +4,9 @@ Convention: append an integer to the end of the test, for multiple versions of
 the same test at different difficulties.  Higher numbers are more difficult
 (lower thresholds or accept fewer mistakes).  Example:
     test_all_equal1(self):
-	...
+        ...
     test_all_equal2(self):
-	...
+        ...
 """
 import sys
 
@@ -19,193 +19,193 @@ import hybrid
 
 class TestCrossCorrelation2D(unittest.TestCase):
     def setUp(self):
-	self.small_height = 10
-	self.small_width = 8
-	self.big_height = 50
-	self.big_width = 40
-	self.big_img_grey = np.random.rand(self.big_height,self.big_width)
-	self.small_img_grey = np.random.rand(self.small_height,self.small_width)
-	self.img_rgb = np.random.rand(self.big_height,self.big_width,3)
+        self.small_height = 10
+        self.small_width = 8
+        self.big_height = 50
+        self.big_width = 40
+        self.big_img_grey = np.random.rand(self.big_height,self.big_width)
+        self.small_img_grey = np.random.rand(self.small_height,self.small_width)
+        self.img_rgb = np.random.rand(self.big_height,self.big_width,3)
 
     def test_identity_filter_grey(self):
-	'''
-	Tests whether the cross-correlation identity returns the original image
-	'''
-	identity = np.zeros((3,3))
-	identity[1,1] = 1
-	img_dup = hybrid.cross_correlation_2d(self.small_img_grey, identity)
-	self.assertTrue(np.allclose(img_dup, self.small_img_grey, atol=1e-08), \
-		msg="Failed to return original image under identity cross-correlation")
+        '''
+        Tests whether the cross-correlation identity returns the original image
+        '''
+        identity = np.zeros((3,3))
+        identity[1,1] = 1
+        img_dup = hybrid.cross_correlation_2d(self.small_img_grey, identity)
+        self.assertTrue(np.allclose(img_dup, self.small_img_grey, atol=1e-08), \
+                msg="Failed to return original image under identity cross-correlation")
 
     def test_mean_filter_grey(self):
-	'''
-	Tests cross-correlation of greyscale image using mean filter
-	'''
-	mean = np.ones((3,3))
-	student = hybrid.cross_correlation_2d(self.small_img_grey, mean)
-	solution = cv2.filter2D(self.small_img_grey, -1, mean, borderType=cv2.BORDER_CONSTANT)
+        '''
+        Tests cross-correlation of greyscale image using mean filter
+        '''
+        mean = np.ones((3,3))
+        student = hybrid.cross_correlation_2d(self.small_img_grey, mean)
+        solution = cv2.filter2D(self.small_img_grey, -1, mean, borderType=cv2.BORDER_CONSTANT)
 
-	self.assertTrue(np.allclose(student, solution, atol=1e-08), \
-		msg="Incorrect cross-correlation of greyscale image using mean filter")
+        self.assertTrue(np.allclose(student, solution, atol=1e-08), \
+                msg="Incorrect cross-correlation of greyscale image using mean filter")
 
     def test_mean_filter_rect_grey(self):
-	'''
-	Tests cross-correlation of greyscale image using a rectangular mean filter
-	'''
-	mean = np.ones((3,5))
-	student = hybrid.cross_correlation_2d(self.small_img_grey, mean)
-	solution = cv2.filter2D(self.small_img_grey, -1, mean, borderType=cv2.BORDER_CONSTANT)
+        '''
+        Tests cross-correlation of greyscale image using a rectangular mean filter
+        '''
+        mean = np.ones((3,5))
+        student = hybrid.cross_correlation_2d(self.small_img_grey, mean)
+        solution = cv2.filter2D(self.small_img_grey, -1, mean, borderType=cv2.BORDER_CONSTANT)
 
-	self.assertTrue(np.allclose(student, solution, atol=1e-08), \
-		msg="Incorrect cross-correlation of greyscale image using rectangular mean filter")
+        self.assertTrue(np.allclose(student, solution, atol=1e-08), \
+                msg="Incorrect cross-correlation of greyscale image using rectangular mean filter")
 
     def test_mean_filter_RGB(self):
-	'''
-	Tests cross-correlation of RGB image using a rectangular filter
-	'''
-	mean = np.ones((3,3))
-	student = hybrid.cross_correlation_2d(self.img_rgb, mean)
-	solution = cv2.filter2D(self.img_rgb, -1, mean, borderType=cv2.BORDER_CONSTANT)
+        '''
+        Tests cross-correlation of RGB image using a rectangular filter
+        '''
+        mean = np.ones((3,3))
+        student = hybrid.cross_correlation_2d(self.img_rgb, mean)
+        solution = cv2.filter2D(self.img_rgb, -1, mean, borderType=cv2.BORDER_CONSTANT)
 
-	self.assertTrue(np.allclose(student, solution, atol=1e-08), \
-		msg="Incorrect cross-correlation of RGB image using mean filter")
+        self.assertTrue(np.allclose(student, solution, atol=1e-08), \
+                msg="Incorrect cross-correlation of RGB image using mean filter")
 
     def test_rand_rect_filter_RGB(self):
-	'''
-	Tests cross-correlation of RGB image using a random rectangular filter
-	'''
-	rand_filt = np.random.rand(5,7)
-	student = hybrid.cross_correlation_2d(self.img_rgb, rand_filt)
-	solution = cv2.filter2D(self.img_rgb, -1, rand_filt, borderType=cv2.BORDER_CONSTANT)
+        '''
+        Tests cross-correlation of RGB image using a random rectangular filter
+        '''
+        rand_filt = np.random.rand(5,7)
+        student = hybrid.cross_correlation_2d(self.img_rgb, rand_filt)
+        solution = cv2.filter2D(self.img_rgb, -1, rand_filt, borderType=cv2.BORDER_CONSTANT)
 
-	self.assertTrue(np.allclose(student, solution, atol=1e-08), \
-		msg="Incorrect cross-correlation of RGB image using random rectangular filter")
+        self.assertTrue(np.allclose(student, solution, atol=1e-08), \
+                msg="Incorrect cross-correlation of RGB image using random rectangular filter")
 
     def test_big_filter_grey(self):
-	'''
-	Tests cross-correlation of greyscale image using a filter bigger than image
-	'''
-	filter_height = self.small_height % 2 + self.small_height + 1
-	filter_width = self.small_width % 2 + self.small_width + 1
-	rand_filter = np.random.rand(filter_height, filter_width)
-	student = hybrid.cross_correlation_2d(self.small_img_grey, rand_filter)
-	solution = cv2.filter2D(self.small_img_grey, -1, rand_filter, borderType=cv2.BORDER_CONSTANT)
+        '''
+        Tests cross-correlation of greyscale image using a filter bigger than image
+        '''
+        filter_height = self.small_height % 2 + self.small_height + 1
+        filter_width = self.small_width % 2 + self.small_width + 1
+        rand_filter = np.random.rand(filter_height, filter_width)
+        student = hybrid.cross_correlation_2d(self.small_img_grey, rand_filter)
+        solution = cv2.filter2D(self.small_img_grey, -1, rand_filter, borderType=cv2.BORDER_CONSTANT)
 
-	self.assertTrue(np.allclose(student, solution, atol=1e-08), \
-		msg="Incorrect cross-correlation of greyscale image using filter bigger than image")
+        self.assertTrue(np.allclose(student, solution, atol=1e-08), \
+                msg="Incorrect cross-correlation of greyscale image using filter bigger than image")
 
 class TestConvolve2D(unittest.TestCase):
     def setUp(self):
-	self.small_height = 10
-	self.small_width = 8
-	self.big_height = 50
-	self.big_width = 40
-	self.big_img_grey = np.random.rand(self.big_height,self.big_width)
-	self.small_img_grey = np.random.rand(self.small_height,self.small_width)
-	self.img_rgb = np.random.rand(self.big_height,self.big_width,3)
+        self.small_height = 10
+        self.small_width = 8
+        self.big_height = 50
+        self.big_width = 40
+        self.big_img_grey = np.random.rand(self.big_height,self.big_width)
+        self.small_img_grey = np.random.rand(self.small_height,self.small_width)
+        self.img_rgb = np.random.rand(self.big_height,self.big_width,3)
 
     def test_identity_filter_grey(self):
-	'''
-	Tests whether the convolution identity returns the original image
-	'''
-	identity = np.zeros((3,3))
-	identity[1,1] = 1
-	img_dup = hybrid.convolve_2d(self.small_img_grey, identity)
-	self.assertTrue(np.allclose(img_dup, self.small_img_grey, atol=1e-08), \
-		msg="Failed to return original image under identity convolution")
+        '''
+        Tests whether the convolution identity returns the original image
+        '''
+        identity = np.zeros((3,3))
+        identity[1,1] = 1
+        img_dup = hybrid.convolve_2d(self.small_img_grey, identity)
+        self.assertTrue(np.allclose(img_dup, self.small_img_grey, atol=1e-08), \
+                msg="Failed to return original image under identity convolution")
 
     def test_mean_filter_grey(self):
-	'''
-	Tests convolution of greyscale image using mean filter
-	'''
-	mean = np.ones((3,3))
-	student = hybrid.convolve_2d(self.small_img_grey, mean)
-	solution = cv2.filter2D(self.small_img_grey, -1, mean, borderType=cv2.BORDER_CONSTANT)
+        '''
+        Tests convolution of greyscale image using mean filter
+        '''
+        mean = np.ones((3,3))
+        student = hybrid.convolve_2d(self.small_img_grey, mean)
+        solution = cv2.filter2D(self.small_img_grey, -1, mean, borderType=cv2.BORDER_CONSTANT)
 
-	self.assertTrue(np.allclose(student, solution, atol=1e-08), \
-		msg="Incorrect result convolving greyscale image using mean filter")
+        self.assertTrue(np.allclose(student, solution, atol=1e-08), \
+                msg="Incorrect result convolving greyscale image using mean filter")
 
     def test_mean_filter_rect_grey(self):
-	'''
-	Tests convolution of greyscale image using a rectangular mean filter
-	'''
-	mean = np.ones((3,5))
-	mean_trans = np.fliplr(np.flipud(mean))
-	student = hybrid.convolve_2d(self.small_img_grey, mean)
-	solution = cv2.filter2D(self.small_img_grey, -1, mean_trans, borderType=cv2.BORDER_CONSTANT)
+        '''
+        Tests convolution of greyscale image using a rectangular mean filter
+        '''
+        mean = np.ones((3,5))
+        mean_trans = np.fliplr(np.flipud(mean))
+        student = hybrid.convolve_2d(self.small_img_grey, mean)
+        solution = cv2.filter2D(self.small_img_grey, -1, mean_trans, borderType=cv2.BORDER_CONSTANT)
 
-	self.assertTrue(np.allclose(student, solution, atol=1e-08), \
-		msg="Incorrect result convolving greyscale image using rectangular mean filter")
+        self.assertTrue(np.allclose(student, solution, atol=1e-08), \
+                msg="Incorrect result convolving greyscale image using rectangular mean filter")
 
     def test_mean_filter_RGB(self):
-	'''
-	Tests convolution of RGB image using a rectangular filter
-	'''
-	mean = np.ones((3,3))
-	student = hybrid.convolve_2d(self.img_rgb, mean)
-	solution = cv2.filter2D(self.img_rgb, -1, mean, borderType=cv2.BORDER_CONSTANT)
+        '''
+        Tests convolution of RGB image using a rectangular filter
+        '''
+        mean = np.ones((3,3))
+        student = hybrid.convolve_2d(self.img_rgb, mean)
+        solution = cv2.filter2D(self.img_rgb, -1, mean, borderType=cv2.BORDER_CONSTANT)
 
-	self.assertTrue(np.allclose(student, solution, atol=1e-08), \
-		msg="Incorrect result convolving RGB image using mean filter")
+        self.assertTrue(np.allclose(student, solution, atol=1e-08), \
+                msg="Incorrect result convolving RGB image using mean filter")
 
     def test_rand_rect_filter_RGB(self):
-	'''
-	Tests convolution of RGB image using a random rectangular filter
-	'''
-	rand_filt = np.random.rand(5,7)
-	rand_filt_trans = np.fliplr(np.flipud(rand_filt))
-	student = hybrid.convolve_2d(self.img_rgb, rand_filt)
-	solution = cv2.filter2D(self.img_rgb, -1, rand_filt_trans, borderType=cv2.BORDER_CONSTANT)
+        '''
+        Tests convolution of RGB image using a random rectangular filter
+        '''
+        rand_filt = np.random.rand(5,7)
+        rand_filt_trans = np.fliplr(np.flipud(rand_filt))
+        student = hybrid.convolve_2d(self.img_rgb, rand_filt)
+        solution = cv2.filter2D(self.img_rgb, -1, rand_filt_trans, borderType=cv2.BORDER_CONSTANT)
 
-	self.assertTrue(np.allclose(student, solution, atol=1e-08), \
-		msg="Incorrect result convolving RGB image using random rectangular filter")
+        self.assertTrue(np.allclose(student, solution, atol=1e-08), \
+                msg="Incorrect result convolving RGB image using random rectangular filter")
 
     def test_big_filter_grey(self):
-	'''
-	Tests convolution of greyscale image using a filter bigger than image
-	'''
-	filter_height = self.small_height % 2 + self.small_height + 1
-	filter_width = self.small_width % 2 + self.small_width + 1
-	rand_filt = np.random.rand(filter_height, filter_width)
-	rand_filt_trans = np.fliplr(np.flipud(rand_filt))
-	student = hybrid.convolve_2d(self.small_img_grey, rand_filt)
-	solution = cv2.filter2D(self.small_img_grey, -1, rand_filt_trans, borderType=cv2.BORDER_CONSTANT)
+        '''
+        Tests convolution of greyscale image using a filter bigger than image
+        '''
+        filter_height = self.small_height % 2 + self.small_height + 1
+        filter_width = self.small_width % 2 + self.small_width + 1
+        rand_filt = np.random.rand(filter_height, filter_width)
+        rand_filt_trans = np.fliplr(np.flipud(rand_filt))
+        student = hybrid.convolve_2d(self.small_img_grey, rand_filt)
+        solution = cv2.filter2D(self.small_img_grey, -1, rand_filt_trans, borderType=cv2.BORDER_CONSTANT)
 
-	self.assertTrue(np.allclose(student, solution, atol=1e-08), \
-		msg="Incorrect result convolving greyscale image using filter bigger than image")
+        self.assertTrue(np.allclose(student, solution, atol=1e-08), \
+                msg="Incorrect result convolving greyscale image using filter bigger than image")
 
 class TestGaussianKernel2D(unittest.TestCase):
     def test_5_5_5(self):
-	a = np.array([[ 0.03688345,  0.03916419,  0.03995536,  0.03916419,  0.03688345],
-	    [ 0.03916419,  0.04158597,  0.04242606,  0.04158597,  0.03916419],
-	    [ 0.03995536,  0.04242606,  0.04328312,  0.04242606,  0.03995536],
-	    [ 0.03916419,  0.04158597,  0.04242606,  0.04158597,  0.03916419],
-	    [ 0.03688345,  0.03916419,  0.03995536,  0.03916419,  0.03688345]])
-	self.assertTrue(np.allclose(hybrid.gaussian_blur_kernel_2d(5, 5, 5), a,
-	    atol=1e-08))
+        a = np.array([[ 0.03688345,  0.03916419,  0.03995536,  0.03916419,  0.03688345],
+            [ 0.03916419,  0.04158597,  0.04242606,  0.04158597,  0.03916419],
+            [ 0.03995536,  0.04242606,  0.04328312,  0.04242606,  0.03995536],
+            [ 0.03916419,  0.04158597,  0.04242606,  0.04158597,  0.03916419],
+            [ 0.03688345,  0.03916419,  0.03995536,  0.03916419,  0.03688345]])
+        self.assertTrue(np.allclose(hybrid.gaussian_blur_kernel_2d(5, 5, 5), a,
+            atol=1e-08))
 
     def test_1_7_3(self):
-	a = np.array([[ 0.00121496,  0.00200313,  0.00121496],
-	    [ 0.01480124,  0.02440311,  0.01480124],
-	    [ 0.06633454,  0.10936716,  0.06633454],
-	    [ 0.10936716,  0.18031596,  0.10936716],
-	    [ 0.06633454,  0.10936716,  0.06633454],
-	    [ 0.01480124,  0.02440311,  0.01480124],
-	    [ 0.00121496,  0.00200313,  0.00121496]])
-	self.assertTrue(np.allclose(hybrid.gaussian_blur_kernel_2d(1, 7, 3), a,
-	    atol=1e-08))
+        a = np.array([[ 0.00121496,  0.00200313,  0.00121496],
+            [ 0.01480124,  0.02440311,  0.01480124],
+            [ 0.06633454,  0.10936716,  0.06633454],
+            [ 0.10936716,  0.18031596,  0.10936716],
+            [ 0.06633454,  0.10936716,  0.06633454],
+            [ 0.01480124,  0.02440311,  0.01480124],
+            [ 0.00121496,  0.00200313,  0.00121496]])
+        self.assertTrue(np.allclose(hybrid.gaussian_blur_kernel_2d(1, 7, 3), a,
+            atol=1e-08))
 
     def test_1079_3_5(self):
-	a = np.array([[ 0.06600011,  0.06685595,  0.06714369,  0.06685595,  0.06600011],
-	    [ 0.06628417,  0.06714369,  0.06743267,  0.06714369,  0.06628417],
-	    [ 0.06600011,  0.06685595,  0.06714369,  0.06685595,  0.06600011]])
-	self.assertTrue(np.allclose(hybrid.gaussian_blur_kernel_2d(10.79, 3, 5),
-	    a, atol=1e-08))
+        a = np.array([[ 0.06600011,  0.06685595,  0.06714369,  0.06685595,  0.06600011],
+            [ 0.06628417,  0.06714369,  0.06743267,  0.06714369,  0.06628417],
+            [ 0.06600011,  0.06685595,  0.06714369,  0.06685595,  0.06600011]])
+        self.assertTrue(np.allclose(hybrid.gaussian_blur_kernel_2d(10.79, 3, 5),
+            a, atol=1e-08))
 
 class TestHighLowPass(unittest.TestCase):
 
     def setUp(self):
-	self.img1 = np.array([[[ 0.98722069,  0.67420573,  0.9598271 ],
+        self.img1 = np.array([[[ 0.98722069,  0.67420573,  0.9598271 ],
         [ 0.26670152,  0.21624121,  0.65188739],
         [ 0.00162782,  0.93263815,  0.7822223 ],
         [ 0.33158517,  0.08778013,  0.45635313]],
@@ -214,7 +214,7 @@ class TestHighLowPass(unittest.TestCase):
         [ 0.62008793,  0.88991631,  0.87039188],
         [ 0.3807554 ,  0.0592103 ,  0.77255413],
         [ 0.44321465,  0.96987623,  0.52741498]]])
-	self.img2 = np.  array([[[ 0.46584548,  0.12828543,  0.41726697],
+        self.img2 = np.  array([[[ 0.46584548,  0.12828543,  0.41726697],
         [ 0.68833349,  0.64108587,  0.28157041],
         [ 0.29749772,  0.55255637,  0.50586397],
         [ 0.96066347,  0.66325414,  0.11909561],
@@ -240,7 +240,7 @@ class TestHighLowPass(unittest.TestCase):
 
 
     def test_low_pass_2_3(self):
-	r = np.array([[[ 0.3088114 ,  0.24855971,  0.39614979],
+        r = np.array([[[ 0.3088114 ,  0.24855971,  0.39614979],
         [ 0.33504927,  0.36201988,  0.55967795],
         [ 0.22154193,  0.35337206,  0.46181069],
         [ 0.13350745,  0.23712374,  0.2895637 ]],
@@ -250,11 +250,11 @@ class TestHighLowPass(unittest.TestCase):
         [ 0.23367623,  0.3610497 ,  0.46558965],
         [ 0.14036547,  0.23883435,  0.29052476]]])
 
-	self.assertTrue(np.allclose(hybrid.low_pass(self.img1, 2, 3),
-	    r, atol=1e-08))
+        self.assertTrue(np.allclose(hybrid.low_pass(self.img1, 2, 3),
+            r, atol=1e-08))
 
     def test_high_pass_2_3(self):
-	r = np.array([[[ 0.67840929,  0.42564602,  0.56367731],
+        r = np.array([[[ 0.67840929,  0.42564602,  0.56367731],
         [-0.06834775, -0.14577867,  0.09220944],
         [-0.21991411,  0.57926609,  0.32041161],
         [ 0.19807773, -0.14934361,  0.16678943]],
@@ -263,8 +263,8 @@ class TestHighLowPass(unittest.TestCase):
         [ 0.27778178,  0.53327464,  0.30796907],
         [ 0.14707917, -0.3018394 ,  0.30696447],
         [ 0.30284919,  0.73104188,  0.23689022]]])
-	self.assertTrue(np.allclose(hybrid.high_pass(self.img1, 2, 3),
-	    r, atol=1e-08))
+        self.assertTrue(np.allclose(hybrid.high_pass(self.img1, 2, 3),
+            r, atol=1e-08))
 
     def test_low_pass_9_7(self):
         r = np.array([[[ 0.17963478,  0.17124501,  0.12221388],
@@ -290,11 +290,11 @@ class TestHighLowPass(unittest.TestCase):
         [ 0.22014196,  0.20803099,  0.16336348],
         [ 0.21928093,  0.20690543,  0.16274287],
         [ 0.18694027,  0.17054497,  0.13759625]]])
-	self.assertTrue(np.allclose(hybrid.low_pass(self.img2, 9, 7), r,
-		atol=1e-08))
+        self.assertTrue(np.allclose(hybrid.low_pass(self.img2, 9, 7), r,
+                atol=1e-08))
 
     def test_high_pass_9_7(self):
-	r = np.array([[[ 0.2862107 , -0.04295958,  0.29505309],
+        r = np.array([[[ 0.2862107 , -0.04295958,  0.29505309],
         [ 0.46900091,  0.43362076,  0.12043671],
         [ 0.07635266,  0.34369499,  0.34341876],
         [ 0.74036798,  0.45551239, -0.04270926],
@@ -318,7 +318,7 @@ class TestHighLowPass(unittest.TestCase):
         [ 0.39822023, -0.00237932,  0.53796125],
         [ 0.14244267,  0.45042029,  0.36582769]]])
         self.assertTrue(np.allclose(hybrid.high_pass(self.img2, 9, 7), r,
-		atol=1e-08))
+                atol=1e-08))
 
 if __name__ == '__main__':
     np.random.seed(4670)
